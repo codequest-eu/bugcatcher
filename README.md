@@ -1,0 +1,2 @@
+# bugcatcher
+Bugsnag for development
