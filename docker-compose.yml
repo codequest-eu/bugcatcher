@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+  server:
+    build:
+      context: server
+    ports:
+      - '1984:1984'
+    volumes:
+      - ./traces:/traces
+  client:
+    environment:
+      - BUGSNAG_API_KEY=7b5ec5d0a5bc5be5e5e55834e07f7108
+      - BUGSNAG_ENDPOINT=server:1984
+      - BUNDLE_PATH=/bundle
+    image: ruby:2.4.0
+    links:
+      - server
+    volumes:
+      - ./client:/client
+      - bundle:/bundle
+    working_dir: /client
+
+volumes:
+  bundle:
