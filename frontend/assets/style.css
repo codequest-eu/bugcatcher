@@ -66,9 +66,22 @@ li.error-item {
   display: none;
 }
 
-.error-events-toggle {
+.error-events-toggle, .error-events-separator {
   font-variant: small-caps;
   color: #666;
+}
+
+.error-events-separator {
+    vertical-align: middle;
+}
+
+.error-events-delete {
+  font-variant: small-caps;
+  color: red;
+}
+
+.error-events-toggle:hover, .error-events-delete:hover {
+  text-decoration: underline;
 }
 
 .error-events-list {

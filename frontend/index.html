@@ -28,7 +28,7 @@
             in
             <span class="error-location">{%= error.location %}</span>
             <span class="error-severity">{%= error.severity %}</span>
-            <div class="error-message">&laquo;{%= error.events[0].message %}&raquo;</div>
+            <div class="error-message">{%= error.events[0].message %}</div>
             <div class="error-seen">
               <span class="error-first-seen">{%= timeSince(error.createdAt) %} ago</span>
               -
@@ -36,6 +36,8 @@
             </div>
             <div class="error-events hide-details">
               <span class="error-events-toggle" onclick="toggleVisibility(this)">details</span>
+              <span class="error-events-separator">&middot;</span>
+              <span class="error-events-delete">delete</span>
               <ul class="error-events-list togglable-details">
                 {% for (var j = 0; j < error.events.length; j++) { %}
                   {% var event = error.events[j]; %}
@@ -45,7 +47,7 @@
                       on host
                       <span class="event-hostname">{%= event.hostname %}</span>
                     </div>
-                    <div class="error-message">&laquo;{%= event.message %}&raquo;</div>
+                    <div class="error-message">{%= event.message %}</div>
                     <ul class="stack-trace">
                       {% for (var k = 0; k < event.stackTrace.length; k++) { %}
                         {% var frame = event.stackTrace[k]; %}
