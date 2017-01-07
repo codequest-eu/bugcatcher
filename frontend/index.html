@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+  <title>Bug Catcher</title>
+  <script src="/assets/tmpl.min.js"></script>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <div id="header">
+    <div id="header-container">
+      <span class="title">Bug Catcher</span>
+      <span class="product-info">
+        <span id="api-key"></span>
+      </span>
+    </div>
+  </div>
+  <div id="container">
+    <div id="main"></div>
+  </div>
+  <!-- Templates... -->
+  <script type="text/x-tmpl" id="errors">
+    <ul class="errors">
+      {% for (var i = 0; i < o.length; i++) { %}
+        {% var error = o[i]; %}
+        <li class="error-item" title="warning">
+          <div class="error-head">
+            <span class="error-class">{%= error.errorClass %}</span>
+            in
+            <span class="error-location">{%= error.location %}</span>
+            <span class="error-severity">{%= error.severity %}</span>
+            <div class="error-message">&laquo;{%= error.events[0].message %}&raquo;</div>
+            <div class="error-seen">
+              <span class="error-first-seen">{%= timeSince(error.createdAt) %} ago</span>
+              -
+              <span class="error-last-seen">{%= timeSince(error.updatedAt) %} ago</span>
+            </div>
+            <div class="error-events hide-details">
+              <span class="error-events-toggle" onclick="toggleVisibility(this)">details</span>
+              <ul class="error-events-list togglable-details">
+                {% for (var j = 0; j < error.events.length; j++) { %}
+                  {% var event = error.events[j]; %}
+                  <li class="event-item">
+                    <div class="event-details">
+                      <span class="event-timestamp">{%= timeSince(event.createdAt) %} ago</span>
+                      on host
+                      <span class="event-hostname">{%= event.hostname %}</span>
+                    </div>
+                    <div class="error-message">&laquo;{%= event.message %}&raquo;</div>
+                    <ul class="stack-trace">
+                      {% for (var k = 0; k < event.stackTrace.length; k++) { %}
+                        {% var frame = event.stackTrace[k]; %}
+                        <li class="stack-frame hide-details">
+                          <span class="stack-frame-location" onclick="toggleVisibility(this)">
+                            {%= frame.file %}:{%= frame.lineNumber %}
+                          </span>
+                          <span class="stack-frame-method">
+                            {%= frame.method %}
+                          </span>
+                          <ul class="stack-frame-context togglable-details">
+                            {% for (var l = 0; l < frame.code.length; l++) { %}
+                              {% var contextLine = frame.code[l]; %}
+                              <li class="stack-frame-context-line {%= contextClassName(frame.lineNumber, contextLine.lineNumber) %}">
+                                <span class="stack-frame-context-line-number">{%= contextLine.lineNumber %}</span>
+                                <span class="stack-frame-context-line-content">{%= contextLine.content %}</span>
+                              </li>
+                            {% } %}
+                          </ul>
+                        </li>
+                      {% } %}
+                    </ul>
+                  </li>
+                {% } %}
+              </ul>
+            </div>
+          </div>
+        </li>
+      {% } %}
+    </ul>
+  </script>
+  <script src="/assets/app.js"></script>
+</body>
+</html>

@@ -4,10 +4,12 @@ services:
   server:
     build:
       context: server
+    environment:
+      - API_KEY=7b5ec5d0a5bc5be5e5e55834e07f7108
     ports:
       - '1984:1984'
     volumes:
-      - ./traces:/traces
+      - ./frontend:/frontend
   client:
     environment:
       - BUGSNAG_API_KEY=7b5ec5d0a5bc5be5e5e55834e07f7108

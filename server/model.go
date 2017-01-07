@@ -33,6 +33,7 @@ type Event struct {
 	ID             uint `gorm:"primary_key" json:"id"`
 	ErrorID        uint `sql:"type:integer REFERENCES errors(id) ON DELETE CASCADE ON UPDATE CASCADE"`
 	Hostname       string
+	Message        string
 	SerializedData []byte
 	CreatedAt      int64
 } // type Event
@@ -66,11 +67,13 @@ func (e *Event) MarshalJSON() ([]byte, error) {
 	return json.Marshal(
 		&struct {
 			Hostname   string          `json:"hostname,omitempty"`
-			StackTrace []StackFrame    `json:"stackrace,omitempty"`
+			Message    string          `json:"message,omitempty"`
+			StackTrace []StackFrame    `json:"stackTrace,omitempty"`
 			Metadata   json.RawMessage `json:"metaData,omitempty"`
 			CreatedAt  int64           `json:"createdAt,omitempty"`
 		}{
 			Hostname:   e.Hostname,
+			Message:    e.Message,
 			StackTrace: eventData.StackTrace,
 			Metadata:   eventData.Metadata,
 			CreatedAt:  e.CreatedAt,

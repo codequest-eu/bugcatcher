@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -21,27 +22,53 @@ func (c *controller) receive(w http.ResponseWriter, r *http.Request, _ httproute
 	if err := decoder.Decode(&notification); err != nil {
 		return err
 	}
-	errors, err := notification.ToErrors()
+	reportedErrors, err := notification.ToErrors()
 	if err != nil {
 		return err
 	}
-	for _, error := range errors {
-		if err := c.db.Create(&error).Error; err != nil {
+	for _, reportedError := range reportedErrors {
+		if err := c.processError(&reportedError); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (c *controller) report(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
-	w.Header().Add("Content-Type", "application/json")
+func (c *controller) listErrors(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
 	encoder.SetIndent("", "  ")
 	var errors []Error
 	if err := c.db.Preload("Events").Find(&errors).Error; err != nil {
 		return err
 	}
-	return encoder.Encode(&errors)
+	return encoder.Encode(&struct {
+		APIKey string  `json:"apiKey"`
+		Errors []Error `json:"errors"`
+	}{
+		APIKey: os.Getenv("API_KEY"),
+		Errors: errors,
+	})
+}
+
+func (c *controller) processError(reportedError *Error) error {
+	var matches []Error
+	query := c.db.Where(
+		"error_class = ? AND location = ? AND severity = ?",
+		reportedError.ErrorClass,
+		reportedError.Location,
+		reportedError.Severity,
+	)
+	if err := query.Find(&matches).Error; err != nil {
+		return err
+	}
+	if len(matches) == 0 {
+		return c.db.Save(reportedError).Error
+	}
+	event := reportedError.Events[0]
+	event.ErrorID = matches[0].ID
+	return c.db.Save(&event).Error
 }
 
 type fallibleHandler func(http.ResponseWriter, *http.Request, httprouter.Params) error
@@ -55,13 +82,19 @@ func handleFallible(inner fallibleHandler) httprouter.Handle {
 	}
 }
 
+func indexHTML(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	http.ServeFile(w, r, "/frontend/index.html")
+}
+
 func main() {
 	router := httprouter.New()
 	db := dbOrDie()
 	defer db.Close()
 	ctrl := &controller{db: db.Debug()}
+	router.GET("/", indexHTML)
 	router.POST("/", handleFallible(ctrl.receive))
-	router.GET("/", handleFallible(ctrl.report))
+	router.GET("/errors", handleFallible(ctrl.listErrors))
+	router.ServeFiles("/assets/*filepath", http.Dir("/frontend/assets"))
 	log.Print("About to start serving on port 1984")
 	http.ListenAndServe(":1984", router)
 }

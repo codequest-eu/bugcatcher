@@ -1,0 +1,113 @@
+body {
+  font-family: 'Source Code Pro';
+  margin: 50px 0 1em 0;
+}
+
+div#header {
+    position: fixed;
+    width: 100%;
+    padding: 0;
+    top: 0;
+    background-color: black;
+    color: white;
+}
+
+div#header-container {
+  width: 800px;
+  margin: 0px auto;
+  padding: 0.5em 0;
+}
+
+span.product-info {
+  float: right;
+  font-weight: 100;
+}
+
+.red {
+  color: red;
+}
+
+div#container {
+  width: 800px;
+  margin: 20px auto;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li.error-item {
+    padding: 0.5em 0em 0.5em 1em;
+    border-left: 3px solid orange;
+    margin-bottom: 0.5em;
+}
+
+.error-class {
+  font-weight: bold;
+}
+
+.error-location {
+  color: #666;
+}
+
+.error-message {
+  font-style: italic;
+  color: #666;
+}
+
+.error-severity {
+  font-variant: small-caps;
+  float: right;
+  color: orange;
+}
+
+.hide-details .togglable-details {
+  display: none;
+}
+
+.error-events-toggle {
+  font-variant: small-caps;
+  color: #666;
+}
+
+.error-events-list {
+  padding: 0em 0em 1em 1em;
+}
+
+.event-item {
+  padding-top: 1em;
+}
+
+ul.stack-trace {
+  margin-top: 0.5em;
+  font-size: 0.8em;
+}
+
+.stack-frame-context-line-content {
+  white-space: pre;
+}
+
+ul.stack-frame-context {
+  margin: 0.5em;
+  border: 1px solid #ddd;
+}
+
+li.stack-frame-context-line {
+  padding: 0.2em;
+}
+
+.highlight {
+  background-color: rgb(255, 246, 231);
+}
+
+.stack-frame-context-line-number {
+  color: #666;
+  display: inline-block;
+  min-width: 2em;
+  text-align: right;
+}
+
+.stack-frame-context-line-content {
+  padding-left: 0.5em;
+}

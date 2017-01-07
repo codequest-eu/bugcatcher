@@ -60,7 +60,10 @@ func (ex *Exception) ToError(ne *NotificationEvent) (*Error, error) {
 		}
 		stackFrames[pos] = *stackFrame
 	}
-	event := &Event{Hostname: ne.Device.Hostname}
+	event := &Event{
+		Hostname: ne.Device.Hostname,
+		Message:  ex.Message,
+	}
 	event.SetEventData(EventData{
 		StackTrace: stackFrames,
 		Metadata:   ne.Metadata,
