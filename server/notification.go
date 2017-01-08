@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -25,9 +26,10 @@ func (n *Notification) ToErrors() ([]Error, error) {
 }
 
 type NotificationEvent struct {
-	Exceptions []Exception `json:"exceptions,omitempty"`
-	Severity   string      `json:"severity,omitempty"`
-	Device     struct {
+	Exceptions   []Exception `json:"exceptions,omitempty"`
+	Severity     string      `json:"severity,omitempty"`
+	GroupingHash string      `json:"groupingHash,omitempty"`
+	Device       struct {
 		Hostname string `json:"hostname,omitempty"`
 	} `json:"device,omitempty"`
 	Metadata json.RawMessage `json:"metaData,omitempty"`
@@ -69,10 +71,11 @@ func (ex *Exception) ToError(ne *NotificationEvent) (*Error, error) {
 		Metadata:   ne.Metadata,
 	})
 	ret := &Error{
-		ErrorClass: ex.ErrorClass,
-		Severity:   ne.Severity,
-		Location:   ex.Location(),
-		Events:     []Event{*event},
+		GroupingHash: ex.GroupingHash(ne),
+		ErrorClass:   ex.ErrorClass,
+		Severity:     ne.Severity,
+		Location:     ex.Location(),
+		Events:       []Event{*event},
 	}
 	return ret, nil
 }
@@ -83,6 +86,19 @@ func (e *Exception) Location() string {
 	}
 	topFrame := e.StackTrace[0]
 	return fmt.Sprintf("%s:%d", topFrame.File, topFrame.LineNumber)
+}
+
+func (e *Exception) GroupingHash(ne *NotificationEvent) string {
+	source := ne.GroupingHash
+	if source == "" {
+		source = fmt.Sprintf(
+			"%s|%s|%s",
+			e.ErrorClass,
+			e.Location(),
+			ne.Severity,
+		)
+	}
+	return fmt.Sprintf("%x", sha1.Sum([]byte(source)))
 }
 
 type StackFrameData struct {
