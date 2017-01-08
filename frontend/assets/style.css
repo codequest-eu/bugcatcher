@@ -66,7 +66,7 @@ li.error-item {
   display: none;
 }
 
-.error-events-toggle, .error-events-separator {
+.error-events-toggle, .error-events-separator, .event-metadata-toggle {
   font-variant: small-caps;
   color: #666;
 }
@@ -80,7 +80,7 @@ li.error-item {
   color: red;
 }
 
-.error-events-toggle:hover, .error-events-delete:hover {
+.error-events-toggle:hover, .error-events-delete:hover, .event-metadata-toggle:hover {
   text-decoration: underline;
 }
 
@@ -101,9 +101,15 @@ ul.stack-trace {
   white-space: pre;
 }
 
-ul.stack-frame-context {
+ul.stack-frame-context, .event-metadata-content {
   margin: 0.5em;
   border: 1px solid #ddd;
+}
+
+.event-metadata-content {
+  padding: 0.5em;
+  white-space: pre;
+  font-size: 0.8em;
 }
 
 li.stack-frame-context-line {

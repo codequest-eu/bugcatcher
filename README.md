@@ -6,7 +6,6 @@ Bugsnag-compatible for Docker-based development environments.
 Things that we need to use it comfortably in development:
 
 - [ ] Autobuilt image on Docker Hub;
-- [ ] Display metadata;
 
 ## Nice to have:
 

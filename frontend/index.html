@@ -70,6 +70,13 @@
                         </li>
                       {% } %}
                     </ul>
+                    {% if (Object.keys(event.metaData).length > 0) { %}
+                    <div class="event-metadata-container hide-details">
+                      <span class="event-metadata-toggle" onclick="toggleVisibility(this)">metadata</span>
+                      <div class="event-metadata-content togglable-details">{%= JSON.stringify(event.metaData, null, 2) %}</div>
+                    </div>
+                    {% } %}
+                    </li>
                   </li>
                 {% } %}
               </ul>
