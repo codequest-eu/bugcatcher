@@ -22,7 +22,7 @@
     <ul class="errors">
       {% for (var i = 0; i < o.length; i++) { %}
         {% var error = o[i]; %}
-        <li class="error-item" title="warning">
+        <li class="error-item" id="error-{%= error.id %}" title="warning">
           <div class="error-head">
             <span class="error-class">{%= error.errorClass %}</span>
             in
@@ -37,7 +37,7 @@
             <div class="error-events hide-details">
               <span class="error-events-toggle" onclick="toggleVisibility(this)">details</span>
               <span class="error-events-separator">&middot;</span>
-              <span class="error-events-delete">delete</span>
+              <span class="error-events-delete" onclick="deleteError({%= error.id %})">delete</span>
               <ul class="error-events-list togglable-details">
                 {% for (var j = 0; j < error.events.length; j++) { %}
                   {% var event = error.events[j]; %}

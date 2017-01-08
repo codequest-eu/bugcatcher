@@ -13,8 +13,8 @@ type Error struct {
 	ErrorClass   string  `json:"errorClass"`
 	Location     string  `json:"location"`
 	Severity     string  `json:"severity"`
-	CreatedAt    int64   `json:"createdAt"`
-	UpdatedAt    int64   `json:"updatedAt"`
+	CreatedAt    int64   `gorm:"index" json:"createdAt"`
+	UpdatedAt    int64   `gorm:"index" json:"updatedAt"`
 	Events       []Event `json:"events"`
 } // type Error
 
@@ -35,7 +35,7 @@ type Event struct {
 	Hostname       string
 	Message        string
 	SerializedData []byte
-	CreatedAt      int64
+	CreatedAt      int64 `gorm:"index"`
 } // type Event
 
 func (e *Event) BeforeCreate(scope *gorm.Scope) error {
