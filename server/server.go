@@ -54,12 +54,7 @@ func (c *controller) listErrors(w http.ResponseWriter, r *http.Request, _ httpro
 
 func (c *controller) processError(reportedError *Error) error {
 	var matches []Error
-	query := c.db.Where(
-		"error_class = ? AND location = ? AND severity = ?",
-		reportedError.ErrorClass,
-		reportedError.Location,
-		reportedError.Severity,
-	)
+	query := c.db.Where("grouping_hash = ?", reportedError.GroupingHash)
 	if err := query.Find(&matches).Error; err != nil {
 		return err
 	}

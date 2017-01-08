@@ -9,7 +9,7 @@ import (
 
 type Error struct {
 	ID           uint    `gorm:"primary_key" json:"id"`
-	GroupingHash string  `json:"-"`
+	GroupingHash string  `gorm:"index" json:"-"`
 	ErrorClass   string  `json:"errorClass"`
 	Location     string  `json:"location"`
 	Severity     string  `json:"severity"`
