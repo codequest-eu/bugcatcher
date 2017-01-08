@@ -32,6 +32,18 @@ function contextClassName(lineNoA, lineNoB) {
   return (lineNoA == lineNoB) ? "highlight" : "nohighlight";
 }
 
+function deleteError(errorNo) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      var element = document.getElementById("error-" + errorNo);
+      element.parentElement.removeChild(element);
+    }
+  }
+  xhr.open('DELETE', '/errors/' + errorNo);
+  xhr.send();
+}
+
 (function(d) {
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -50,7 +51,10 @@ func (c *controller) listErrors(w http.ResponseWriter, r *http.Request, _ httpro
 	encoder := json.NewEncoder(w)
 	encoder.SetIndent("", "  ")
 	var errors []Error
-	if err := c.db.Preload("Events").Find(&errors).Error; err != nil {
+	query := c.db.Order("updated_at DESC").Preload("Events", func(db *gorm.DB) *gorm.DB {
+		return db.Order("created_at DESC")
+	})
+	if err := query.Find(&errors).Error; err != nil {
 		return err
 	}
 	return encoder.Encode(&struct {
@@ -60,6 +64,15 @@ func (c *controller) listErrors(w http.ResponseWriter, r *http.Request, _ httpro
 		APIKey: os.Getenv("API_KEY"),
 		Errors: errors,
 	})
+}
+
+func (c *controller) deleteError(w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
+	stringID := params.ByName("id")
+	intID, err := strconv.Atoi(stringID)
+	if err != nil {
+		return err
+	}
+	return c.db.Where("id = ?", intID).Delete(&Error{}).Error
 }
 
 func (c *controller) processError(reportedError *Error) error {
@@ -124,6 +137,7 @@ func main() {
 	router.GET("/", withBasicAuth(indexHTML))
 	router.POST("/", handleFallible(ctrl.receive))
 	router.GET("/errors", withBasicAuth(handleFallible(ctrl.listErrors)))
+	router.DELETE("/errors/:id", withBasicAuth(handleFallible(ctrl.deleteError)))
 	router.ServeFiles("/assets/*filepath", http.Dir("/frontend/assets"))
 	log.Print("About to start serving on port 1984")
 	http.ListenAndServe(":1984", router)
