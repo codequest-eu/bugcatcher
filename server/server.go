@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/subtle"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -22,6 +23,14 @@ func (c *controller) receive(w http.ResponseWriter, r *http.Request, _ httproute
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&notification); err != nil {
 		return err
+	}
+	if notification.APIKey != os.Getenv("API_KEY") {
+		log.Printf(
+			"API key %q not recognized, expected %q",
+			notification.APIKey,
+			os.Getenv("API_KEY"),
+		)
+		return nil
 	}
 	reportedErrors, err := notification.ToErrors()
 	if err != nil {
@@ -89,6 +98,20 @@ func handleFallible(inner fallibleHandler) httprouter.Handle {
 	}
 }
 
+func withBasicAuth(inner httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+		user, pass, ok := r.BasicAuth()
+		apiKey := []byte(os.Getenv("API_KEY"))
+		if !ok || subtle.ConstantTimeCompare([]byte(user), apiKey) != 1 || subtle.ConstantTimeCompare([]byte(pass), apiKey) != 1 {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Who are you?"`)
+			w.WriteHeader(401)
+			w.Write([]byte("Unauthorised.\n"))
+			return
+		}
+		inner(w, r, params)
+	}
+}
+
 func indexHTML(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	http.ServeFile(w, r, "/frontend/index.html")
 }
@@ -98,9 +121,9 @@ func main() {
 	db := dbOrDie()
 	defer db.Close()
 	ctrl := &controller{db: db.Debug()}
-	router.GET("/", indexHTML)
+	router.GET("/", withBasicAuth(indexHTML))
 	router.POST("/", handleFallible(ctrl.receive))
-	router.GET("/errors", handleFallible(ctrl.listErrors))
+	router.GET("/errors", withBasicAuth(handleFallible(ctrl.listErrors)))
 	router.ServeFiles("/assets/*filepath", http.Dir("/frontend/assets"))
 	log.Print("About to start serving on port 1984")
 	http.ListenAndServe(":1984", router)

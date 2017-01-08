@@ -5,9 +5,9 @@ Bugsnag-compatible for Docker-based development environments.
 
 Things that we need to use it comfortably in development:
 
-- [ ] HTTP basic auth;
 - [ ] Autobuilt image on Docker Hub;
 - [ ] Deleting errors;
+- [ ] Display metadata;
 
 ## Nice to have:
 
@@ -15,5 +15,4 @@ Things that would be nice to have if we wanted to use it for something more seri
 
 - [ ] Mail/SMS notifications;
 - [ ] Ignoring errors;
-- [ ] Grouping hash support (optional);
 - [ ] Comments;
