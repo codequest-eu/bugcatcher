@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -61,9 +62,20 @@ func (c *controller) processError(reportedError *Error) error {
 	if len(matches) == 0 {
 		return c.db.Save(reportedError).Error
 	}
+	match := matches[0]
 	event := reportedError.Events[0]
-	event.ErrorID = matches[0].ID
-	return c.db.Save(&event).Error
+	event.ErrorID = match.ID
+	match.UpdatedAt = time.Now().Unix()
+	tx := c.db.Begin()
+	if err := tx.Save(&event).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Save(&match).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit().Error
 }
 
 type fallibleHandler func(http.ResponseWriter, *http.Request, httprouter.Params) error
