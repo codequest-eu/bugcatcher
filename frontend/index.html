@@ -1,92 +1,90 @@
 <!doctype html>
 <html>
-<head>
-  <title>Bug Catcher</title>
-  <script src="/assets/tmpl.min.js"></script>
-  <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" />
-  <link rel="stylesheet" href="/assets/style.css" />
-</head>
-<body>
-  <div id="header">
-    <div id="header-container">
-      <span class="title">Bug Catcher</span>
-      <span class="product-info">
-        <span id="api-key"></span>
-      </span>
+  <head>
+    <title>Bug Catcher</title>
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" />
+    <link href="/assets/style.css" rel="stylesheet" />
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div id="header">
+        <div id="header-container">
+          <span class="title">Bug Catcher</span>
+          <span class="product-info">
+            <span id="api-key">{{ apiKey }}</span>
+          </span>
+        </div>
+      </div>
+      <div id="container">
+        <div id="main">
+          <ul id="errors-list" class="errors">
+            <error v-for="error in errors" v-bind:error="error" v-on:remove="remove"></error>
+          </ul>
+        </div>
+      </div>
     </div>
-  </div>
-  <div id="container">
-    <div id="main"></div>
-  </div>
-  <!-- Templates... -->
-  <script type="text/x-tmpl" id="errors">
-    <ul class="errors">
-      {% for (var i = 0; i < o.length; i++) { %}
-        {% var error = o[i]; %}
-        <li class="error-item" id="error-{%= error.id %}" title="warning">
-          <div class="error-head">
-            <span class="error-class">{%= error.errorClass %}</span>
-            in
-            <span class="error-location">{%= error.location %}</span>
-            <span class="error-severity">{%= error.severity %}</span>
-            <div class="error-message">{%= error.events[0].message %}</div>
-            <div class="error-seen">
-              <span class="error-first-seen">{%= timeSince(error.createdAt) %} ago</span>
-              -
-              <span class="error-last-seen">{%= timeSince(error.updatedAt) %} ago</span>
-            </div>
-            <div class="error-events hide-details">
-              <span class="error-events-toggle" onclick="toggleVisibility(this)">details</span>
-              <span class="error-events-separator">&middot;</span>
-              <span class="error-events-delete" onclick="deleteError({%= error.id %})">delete</span>
-              <ul class="error-events-list togglable-details">
-                {% for (var j = 0; j < error.events.length; j++) { %}
-                  {% var event = error.events[j]; %}
-                  <li class="event-item">
-                    <div class="event-details">
-                      <span class="event-timestamp">{%= timeSince(event.createdAt) %} ago</span>
-                      on host
-                      <span class="event-hostname">{%= event.hostname %}</span>
-                    </div>
-                    <div class="error-message">{%= event.message %}</div>
-                    <ul class="stack-trace">
-                      {% for (var k = 0; k < event.stackTrace.length; k++) { %}
-                        {% var frame = event.stackTrace[k]; %}
-                        <li class="stack-frame hide-details">
-                          <span class="stack-frame-location" onclick="toggleVisibility(this)">
-                            {%= frame.file %}:{%= frame.lineNumber %}
-                          </span>
-                          <span class="stack-frame-method">
-                            {%= frame.method %}
-                          </span>
-                          <ul class="stack-frame-context togglable-details">
-                            {% for (var l = 0; l < frame.code.length; l++) { %}
-                              {% var contextLine = frame.code[l]; %}
-                              <li class="stack-frame-context-line {%= contextClassName(frame.lineNumber, contextLine.lineNumber) %}">
-                                <span class="stack-frame-context-line-number">{%= contextLine.lineNumber %}</span>
-                                <span class="stack-frame-context-line-content">{%= contextLine.content %}</span>
-                              </li>
-                            {% } %}
-                          </ul>
-                        </li>
-                      {% } %}
-                    </ul>
-                    {% if (Object.keys(event.metaData).length > 0) { %}
-                    <div class="event-metadata-container hide-details">
-                      <span class="event-metadata-toggle" onclick="toggleVisibility(this)">metadata</span>
-                      <div class="event-metadata-content togglable-details">{%= JSON.stringify(event.metaData, null, 2) %}</div>
-                    </div>
-                    {% } %}
-                    </li>
-                  </li>
-                {% } %}
-              </ul>
-            </div>
+    <script type="text/x-template" id="error-template">
+      <li class="error-item" title="warning">
+        <div class="error-head" :id="error.id">
+          <span class="error-class">{{ error.errorClass }}</span>
+          in
+          <span class="error-location">{{ error.location }}</span>
+          <span class="error-severity">{{ error.severity }}</span>
+          <div class="error-message">{{ error.events[0].message }}</div>
+          <div class="error-seen">
+            <span class="error-first-seen">{{ createdAt }} ago</span>
+            -
+            <span class="error-last-seen">{{ updatedAt }} ago</span>
           </div>
-        </li>
-      {% } %}
-    </ul>
-  </script>
-  <script src="/assets/app.js"></script>
-</body>
+        </div>
+        <div class="error-toggles">
+          <span v-on:click="toggleDetails" class="error-events-toggle">{{ showDetailsCTA }} details</span>
+          <span class="error-events-separator">&middot;</span>
+          <span v-on:click="remove" class="error-events-delete">delete</span>
+        </div>
+        <div v-if="showDetails" class="error-events">
+          <ul class="error-events-list">
+            <event v-for="event in error.events" v-bind:event="event"></error>
+          </ul>
+        </div>
+      </li>
+    </script>
+    <script type="text/x-template" id="event-template">
+      <li class="event-item">
+        <div class="event-details">
+          <span class="event-timestamp">{{ createdAt }} ago</span>
+          on host
+          <span class="event-hostname">{{ event.hostname }}</span>
+        </div>
+        <div class="error-message">{{ event.message }}</div>
+        <div v-on:click="toggleMetadata" class="event-toggles">show {{ toggleMetadataCTA }}</div>
+        <ul v-if="!showMetadata" class="stack-trace">
+          <stack-frame v-for="frame in event.stackTrace" v-bind:frame="frame"></stack-frame>
+        </ul>
+        <div v-if="showMetadata" class="event-metadata-container">
+          <div class="event-metadata-content">{{ prettyMetadata }}</div>
+        </div>
+      </li>
+    </script>
+    <script type="text/x-template" id="stack-frame-template">
+      <li class="stack-frame">
+        <span v-on:click="toggleContext" class="stack-frame-location">
+          {{ frame.file }}:{{ frame.lineNumber }}
+        </span>
+        <span class="stack-frame-method">{{ frame.method }}</span>
+          <ul v-if="showContext" class="stack-frame-context">
+            <li v-for="contextLine in frame.code"
+                class="stack-frame-context-line"
+                v-bind:class="{ highlight: isHighlighted(contextLine.lineNumber) }">
+              <span class="stack-frame-context-line-number">{{ contextLine.lineNumber }}</span>
+              <span class="stack-frame-context-line-content">{{ contextLine.content }}</span>
+            </li>
+          </ul>
+        </ul>
+      </li>
+    </script>
+    <script src="/assets/app.js"></script>
+  </body>
 </html>

@@ -66,8 +66,11 @@ li.error-item {
   display: none;
 }
 
-.error-events-toggle, .error-events-separator, .event-metadata-toggle {
+.error-toggles, .event-toggles {
   font-variant: small-caps;
+}
+
+.error-events-toggle, .error-events-separator, .event-metadata-toggle, .event-toggles {
   color: #666;
 }
 
@@ -76,11 +79,10 @@ li.error-item {
 }
 
 .error-events-delete {
-  font-variant: small-caps;
   color: red;
 }
 
-.error-events-toggle:hover, .error-events-delete:hover, .event-metadata-toggle:hover {
+.error-events-toggle:hover, .error-events-delete:hover, .event-metadata-toggle:hover, .event-toggles:hover {
   text-decoration: underline;
 }
 
