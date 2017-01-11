@@ -108,10 +108,22 @@ ul.stack-frame-context, .event-metadata-content {
   border: 1px solid #ddd;
 }
 
+li.stack-frame:nth-child(odd) {
+  background: #eee;
+}
+
+li.stack-frame {
+  padding: 0.5em;
+}
+
 .event-metadata-content {
   padding: 0.5em;
   white-space: pre;
   font-size: 0.8em;
+}
+
+ul.stack-frame-context {
+  background-color: white;
 }
 
 li.stack-frame-context-line {
@@ -120,6 +132,9 @@ li.stack-frame-context-line {
 
 .highlight {
   background-color: rgb(255, 246, 231);
+  border-style: solid;
+  border-color: #ddd;
+  border-width: 1px 0px 1px;
 }
 
 .stack-frame-context-line-number {
