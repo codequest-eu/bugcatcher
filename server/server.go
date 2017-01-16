@@ -133,7 +133,7 @@ func main() {
 	router := httprouter.New()
 	db := dbOrDie()
 	defer db.Close()
-	ctrl := &controller{db: db.Debug()}
+	ctrl := &controller{db: db}
 	router.GET("/", withBasicAuth(indexHTML))
 	router.POST("/", handleFallible(ctrl.receive))
 	router.GET("/errors", withBasicAuth(handleFallible(ctrl.listErrors)))
